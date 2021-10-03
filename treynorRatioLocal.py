@@ -101,7 +101,7 @@ df = get_data(tckr_list, start, end)
 returns_df = get_returns(df, step)
 total_returns = get_returns_total(returns_df)
 returns_df = get_returns_percentage(returns_df)
-
+print(returns_df)
 na,corrs_df = correlation(tckr_list, start, end, step)
 
 beta = get_beta(returns_df, corrs_df)

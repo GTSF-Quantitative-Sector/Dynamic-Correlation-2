@@ -29,14 +29,20 @@ def correlationMatrix():
 
 @app.route('/api/v1/treynor', methods=['POST'])
 def get_treynor():
+    print("in treynor")
     tckrs,corrs_df,returns_df = correlation(request.json["tckrs"], request.json["start"], request.json["end"], request.json["step"])
+    print("got correlation")
     total_returns = get_returns_total(returns_df)
+    print("got total_returns")
     beta = get_beta(returns_df, corrs_df)
+    print("get beta")
     risk_free_rate = total_returns[-1]
     treynor = []
     for i in range(len(beta)):
         treynor_part = (total_returns[i] - risk_free_rate) / beta[i]
+        print(treynor_part)
         treynor.append(treynor_part)
+    print("got treynor")
     return treynor.to_json()
 
 
@@ -78,6 +84,17 @@ def correlation(tckr_list, start, end, step):
     returns_df = get_returns(price_df, step).pct_change()
     correlation_df = returns_df.corr(method='pearson')
     return tckr_list,correlation_df,returns_df
+
+def get_returns_percentage(returns_df):
+    returns_df = np.array(returns_df)
+    returns = []
+    for i in range(len(returns_df)-1):
+        initial_returns = returns_df[i]
+        final_returns = returns_df[i+1]
+        difference = final_returns - initial_returns # element wise subtraction
+        percentage_returns = difference / initial_returns # element wise division
+        returns.append(percentage_returns)
+    return returns # NOTE: dataframe is now type np.array()
 
 # finds beta; NOTE: Benchmark must be in last index of tckr_list
 def get_beta(returns_df, corrs_df):
