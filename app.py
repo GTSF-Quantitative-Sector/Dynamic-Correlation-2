@@ -20,9 +20,9 @@ app.config["DEBUG"] = True
 def correlationMatrix():
     print(request.json)
     tckrs,corrs,_unused = correlation(request.json["tckrs"], request.json["start"], request.json["end"], request.json["step"])
-        for col in range(len(tckrs)):
-            if col < row:
-                corrs.iloc[row, col] = ""
+    for col in range(len(tckrs)):
+        if col < row:
+            corrs.iloc[row, col] = ""
     return corrs.to_json()
 
 

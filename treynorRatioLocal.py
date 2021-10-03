@@ -21,7 +21,6 @@ def get_tckrs():
     for i in range(n):
         ele = input("TCKR " + str(i+1) + ": ")
         tckr_list.append(ele.upper())  # adding the element
-
     return tckr_list
 
 # fetches data from yahoo finance using pandas datareader, returns dataframe
