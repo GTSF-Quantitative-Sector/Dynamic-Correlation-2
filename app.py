@@ -19,12 +19,26 @@ app.config["DEBUG"] = True
 @app.route('/api/v1/correlation', methods=['POST'])
 def correlationMatrix():
     print(request.json)
-    tckrs,corrs = correlation(request.json["tckrs"], request.json["start"], request.json["end"], request.json["step"])
-    for row in range(len(tckrs)):
+    tckrs,corrs,_unused = correlation(request.json["tckrs"], request.json["start"], request.json["end"], request.json["step"])
         for col in range(len(tckrs)):
             if col < row:
                 corrs.iloc[row, col] = ""
     return corrs.to_json()
+
+
+
+@app.route('/api/v1/treynor', methods=['POST'])
+def get_treynor():
+    tckrs,corrs_df,returns_df = correlation(request.json["tckrs"], request.json["start"], request.json["end"], request.json["step"])
+    total_returns = get_returns_total(returns_df)
+    beta = get_beta(returns_df, corrs_df)
+    risk_free_rate = total_returns[-1]
+    treynor = []
+    for i in range(len(beta)):
+        treynor_part = (total_returns[i] - risk_free_rate) / beta[i]
+        treynor.append(treynor_part)
+    return treynor.to_json()
+
 
 
 # Helper methods
@@ -56,14 +70,35 @@ def get_returns(price_df, step):
     elif (step.lower() == 'annual'):
         returns = price_df.iloc[((len(price_df.index)-1)%252)::252, :]
     return returns
-    
+
 def correlation(tckr_list, start, end, step):
     start = dt.datetime.strptime(start, '%Y-%m-%d')
     end = dt.datetime.strptime(end, '%Y-%m-%d')
     price_df = get_data(tckr_list, start, end)
     returns_df = get_returns(price_df, step).pct_change()
     correlation_df = returns_df.corr(method='pearson')
-    return tckr_list,correlation_df
+    return tckr_list,correlation_df,returns_df
+
+# finds beta; NOTE: Benchmark must be in last index of tckr_list
+def get_beta(returns_df, corrs_df):
+    returns_df = get_returns_percentage(returns_df)
+    std_df = np.std(returns_df, axis=0)
+    benchmark_std = std_df[-1] # gets last element from tckr_list standard deviation (industry specific index)
+    std_quotient = []
+    for i in range(len(std_df)-1):
+        quotient = std_df[i] / benchmark_std
+        std_quotient.append(quotient)
+    corrs_df = np.transpose(np.array(corrs_df))
+    corrs_df = corrs_df[-1] # Gets correlation between stocks compared to benchmark
+    corrs_df = corrs_df[0:len(corrs_df)-1] # Removes benchmark correlation with itself
+    beta = corrs_df * std_quotient
+    return beta
+
+def get_returns_total(returns_df):
+    returns_df = np.array(returns_df)
+    difference = returns_df[len(returns_df)-1] - returns_df[0]
+    total_returns = difference / returns_df[0]
+    return total_returns
 
 @app.route('/api/v1/historical', methods=['POST'])
 def historicalCorrelation():
@@ -86,7 +121,7 @@ def historicalCorrelation():
         returns = price_df.iloc[((len(price_df.index)-1)%21)::21, :].pct_change()
     elif (step.lower() == 'annual'):
         returns = price_df.iloc[((len(price_df.index)-1)%252)::252, :].pct_change()
-        
+
     while len(returns.index) >= trail:
         trail_df = returns.tail(trail)
         corr = trail_df.corr(method='pearson')
@@ -94,7 +129,7 @@ def historicalCorrelation():
         series = series.rename(returns.tail(1).index[0].strftime('%Y-%m-%d'))
         history = history.append(series)
         returns.drop(returns.tail(rem).index, inplace=True)
-    
+
     return history.iloc[::-1].to_json()
 
 

@@ -7,8 +7,8 @@ import datetime as dt
 
 # Hard-Coded Variables (Change as Needed)
 
-step = "monthly"
-start = "2016-10-2"
+step = "daily"
+start = "2020-10-2"
 end = "2021-10-2"
 
 # Helper Methods
@@ -53,7 +53,7 @@ def get_returns(price_df, step):
 
 # turns return dataframe into a returns dataframe in percentages
 def get_returns_percentage(returns_df):
-    np.array(returns_df)
+    returns_df = np.array(returns_df)
     returns = []
     for i in range(len(returns_df)-1):
         initial_returns = returns_df[i]
@@ -79,18 +79,31 @@ def get_beta(returns_df, corrs_df):
     return beta
 
 
+def get_returns_total(returns_df):
+    returns_df = np.array(returns_df)
+    difference = returns_df[len(returns_df)-1] - returns_df[0]
+    total_returns = difference / returns_df[0]
+    return total_returns
 
+
+def get_treynor(beta, total_returns):
+    risk_free_rate = total_returns[-1]
+    treynor = []
+    for i in range(len(beta)):
+        treynor_part = (total_returns[i] - risk_free_rate) / beta[i]
+        treynor.append(treynor_part)
+    print(treynor)
 
 
 
 # Scripting
-tckr_list = ["PLUG", "DCP", "MSFT", "SPY"] # Benchmark has to be in the back
+tckr_list = ["PLUG", "DCP", "MSFT", "NRZ", "SPY"] # Benchmark has to be in the back
 df = get_data(tckr_list, start, end)
 returns_df = get_returns(df, step)
-returns_df = np.array(returns_df)
+total_returns = get_returns_total(returns_df)
 returns_df = get_returns_percentage(returns_df)
 
 na,corrs_df = correlation(tckr_list, start, end, step)
 
-print(np.std(returns_df, axis=0))
-print(get_beta(returns_df, corrs_df))
+beta = get_beta(returns_df, corrs_df)
+get_treynor(beta, total_returns)
