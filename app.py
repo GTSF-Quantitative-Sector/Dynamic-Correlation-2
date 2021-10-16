@@ -29,21 +29,26 @@ def correlationMatrix():
 
 @app.route('/api/v1/treynor', methods=['POST'])
 def get_treynor():
-    print("in treynor")
-    tckrs,corrs_df,returns_df = correlation(request.json["tckrs"], request.json["start"], request.json["end"], request.json["step"])
-    print("got correlation")
+
+    tckrs,corrs_df,_unused = correlation(request.json["tckrs"], request.json["start"], request.json["end"], request.json["step"])
+
+    df = get_data(tckrs, request.json["start"], request.json["end"])
+    returns_df = np.array(get_returns(df, request.json["step"]))
+
     total_returns = get_returns_total(returns_df)
-    print("got total_returns")
+
     beta = get_beta(returns_df, corrs_df)
-    print("get beta")
+    print(beta)
+
     risk_free_rate = total_returns[-1]
+    print(risk_free_rate)
     treynor = []
     for i in range(len(beta)):
         treynor_part = (total_returns[i] - risk_free_rate) / beta[i]
-        print(treynor_part)
         treynor.append(treynor_part)
-    print("got treynor")
-    return treynor.to_json()
+
+    print(treynor)
+    return json.dumps(treynor)
 
 
 
@@ -86,34 +91,40 @@ def correlation(tckr_list, start, end, step):
     return tckr_list,correlation_df,returns_df
 
 def get_returns_percentage(returns_df):
-    returns_df = np.array(returns_df)
+    #returns_df = np.array(returns_df)
     returns = []
     for i in range(len(returns_df)-1):
         initial_returns = returns_df[i]
         final_returns = returns_df[i+1]
         difference = final_returns - initial_returns # element wise subtraction
+        if sum(initial_returns == 0) > 0: # if any initial returns are zero, go to next element (don't divide by zero)
+            continue
         percentage_returns = difference / initial_returns # element wise division
         returns.append(percentage_returns)
     return returns # NOTE: dataframe is now type np.array()
 
 # finds beta; NOTE: Benchmark must be in last index of tckr_list
 def get_beta(returns_df, corrs_df):
+    # print(returns_df)
     returns_df = get_returns_percentage(returns_df)
     std_df = np.std(returns_df, axis=0)
     benchmark_std = std_df[-1] # gets last element from tckr_list standard deviation (industry specific index)
+
     std_quotient = []
     for i in range(len(std_df)-1):
         quotient = std_df[i] / benchmark_std
         std_quotient.append(quotient)
+    print(corrs_df)
     corrs_df = np.transpose(np.array(corrs_df))
     corrs_df = corrs_df[-1] # Gets correlation between stocks compared to benchmark
     corrs_df = corrs_df[0:len(corrs_df)-1] # Removes benchmark correlation with itself
+    print(corrs_df)
     beta = corrs_df * std_quotient
     return beta
 
 def get_returns_total(returns_df):
-    returns_df = np.array(returns_df)
-    difference = returns_df[len(returns_df)-1] - returns_df[0]
+    # returns_df = np.array(returns_df)
+    difference = returns_df[-1] - returns_df[0]
     total_returns = difference / returns_df[0]
     return total_returns
 

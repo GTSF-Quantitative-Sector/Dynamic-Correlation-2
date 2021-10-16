@@ -7,9 +7,9 @@ import datetime as dt
 
 # Hard-Coded Variables (Change as Needed)
 
-step = "daily"
-start = "2020-10-2"
-end = "2021-10-2"
+step = "monthly"
+start = "2016-10-16"
+end = "2021-10-16"
 
 # Helper Methods
 
@@ -101,7 +101,6 @@ df = get_data(tckr_list, start, end)
 returns_df = get_returns(df, step)
 total_returns = get_returns_total(returns_df)
 returns_df = get_returns_percentage(returns_df)
-print(returns_df)
 na,corrs_df = correlation(tckr_list, start, end, step)
 
 beta = get_beta(returns_df, corrs_df)
