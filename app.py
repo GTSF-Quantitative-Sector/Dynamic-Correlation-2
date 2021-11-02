@@ -175,6 +175,6 @@ def correlation(tckr_list, start, end, step):
     correlation_df = returns_df.corr(method='pearson')
     return tckr_list, price_df, returns_df, correlation_df
 
-
+# Run app
 if __name__ == '__main__':
     app.run()
