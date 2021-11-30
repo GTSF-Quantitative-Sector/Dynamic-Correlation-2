@@ -8,7 +8,7 @@ def lcs(tckrs, correlations, sub):
     # tckrs = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
     # # tckrs = ['A', 'B', 'C', 'D']
     # correlations = np.identity(len(tckrs), dtype=None)
-    # # Will need code that actually calculates correlation between x and y
+    # # Will need code that actually calculates get_stock_data between x and y
     # for x in range(len(tckrs)):
     #     for y in range(x):
     #         value = random() * 2 - 1
@@ -24,7 +24,7 @@ def lcs(tckrs, correlations, sub):
 
     for x in range(len(tckrs)):
         curr = (x, 0.0, [x])
-        # (currInd, total correlation, list of path)
+        # (currInd, total get_stock_data, list of path)
         # prevstates = []
         # prevstates.append(set(curr[2]))
         open = PriorityQueue()
