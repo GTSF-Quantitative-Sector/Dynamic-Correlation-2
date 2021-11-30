@@ -47,6 +47,7 @@ def correlationHistorical():
         series = series.rename(returns_df.tail(1).index[0].strftime('%Y-%m-%d'))
         history = history.append(series)
         returns_df.drop(returns_df.tail(rem).index, inplace=True)
+
     return history.iloc[::-1].to_json()
 
 
@@ -154,10 +155,10 @@ def get_returns_total(price_df):
 
 def get_beta(returns_df, corrs_df):
     """
-    Calculates beta of given tickers using the get_stock_data method.
+    Calculates beta of given tickers using the correlation method.
     NOTE: Benchmark must be in last index of returns_df
     :param returns_df: dataframe of all tickers' returns over period.
-    :param corrs_df: dataframe of all tickers' get_stock_data over period.
+    :param corrs_df: dataframe of all tickers' correlation over period.
     :return: list of beta for each ticker
     """
     # returns_df = get_returns_percentage(returns_df)
@@ -172,7 +173,6 @@ def get_beta(returns_df, corrs_df):
     corrs_df = corrs_df[:-1]  # Removes benchmark get_stock_data with itself
     beta = corrs_df * std_quotient
     return beta
-
 
 # Run app
 if __name__ == '__main__':
