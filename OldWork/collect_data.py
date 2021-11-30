@@ -62,7 +62,7 @@ def collect_data():
     returns_df = stock_returns(tckr_list, return_data, price_df)
     returns_df.to_csv("stock_returns.csv")
     print('RETURNS DONE')
-    # Calculating correlation
+    # Calculating get_stock_data
     correlation_df = returns_df.corr()
     correlation_df.to_csv("stock_correlation.csv")
     print('CORRELATION DONE')

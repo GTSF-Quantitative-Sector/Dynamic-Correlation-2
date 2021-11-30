@@ -72,8 +72,8 @@ def get_beta(returns_df, corrs_df):
         quotient = std_df[i] / benchmark_std
         std_quotient.append(quotient)
     corrs_df = np.transpose(np.array(corrs_df))
-    corrs_df = corrs_df[-1] # Gets correlation between stocks compared to benchmark
-    corrs_df = corrs_df[0:len(corrs_df)-1] # Removes benchmark correlation with itself
+    corrs_df = corrs_df[-1] # Gets get_stock_data between stocks compared to benchmark
+    corrs_df = corrs_df[0:len(corrs_df)-1] # Removes benchmark get_stock_data with itself
     beta = corrs_df * std_quotient
     return beta
 
