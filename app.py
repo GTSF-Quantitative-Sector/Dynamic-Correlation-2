@@ -3,15 +3,19 @@
 !pip install pandas
 !pip install pandas_datareader
 !pip install sklearn.linear_model
+!pip install polygon
 '''
 
 import datetime as dt
 import json
 import numpy as np
 import pandas as pd
-import pandas_datareader as web
 from flask import Flask, request
 from sklearn.linear_model import LinearRegression
+from polygon import RESTClient
+
+
+client = RESTClient("FnNkSDk0OfNVjMrXk5LvvQraTzLvjSXh")
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
@@ -108,7 +112,20 @@ def get_data(tckr_list, st, en):
     :param en: ending date in format YYYY-MM-DD
     :return: pandas dataframe of price data
     """
-    df = web.DataReader(tckr_list, 'yahoo', st, en)["Adj Close"]
+
+    #Let me think about this here, so I would need to iterate through all the tickers (which are the columns) then I would
+    #pull from those dates and format the time from datetime as the row index and get the data from there
+    df = pd.DataFrame()
+
+    timestamps = [dt.date.fromtimestamp(time_agg.timestamp/1000.0) for time_agg in client.get_aggs("AAPL", 1, "day", st, en)]
+    df.index = timestamps
+    
+    for tckr in tckr_list:
+        data = []
+        group_aggs = client.get_aggs(tckr, 1, "day", st, en)
+        for agg in group_aggs:
+            data.append(agg.close)
+        df[tckr] = data
     return df
 
 
