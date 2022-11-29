@@ -15,7 +15,7 @@ from sklearn.linear_model import LinearRegression
 from polygon import RESTClient
 
 
-client = RESTClient("FnNkSDk0OfNVjMrXk5LvvQraTzLvjSXh")
+client = RESTClient("xkkpZQNLtXmSTyJlZT1RpJtpPMG07N4z")
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
